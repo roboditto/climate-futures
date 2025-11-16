@@ -1,19 +1,19 @@
-# 🌎 Caribbean Climate Impact Simulation & Early Warning System
+# 🌎 Climate Futures
 
 A **Python-based climate risk model** that predicts **heatwaves, flooding, and storm surge risk** for Caribbean islands using environmental data, machine learning, and simulation engines.
 
-## 🎯 Project Overview
+## Project Overview
 
 This system combines:
 
-- ✔ Climate science
-- ✔ Predictive modeling
-- ✔ Real Caribbean relevance
-- ✔ Advanced algorithms
-- ✔ Interactive visualizations
-- ✔ Research-grade reporting
+- Climate science
+- Predictive modeling
+- Real Caribbean relevance
+- Advanced algorithms
+- Interactive visualizations
+- Research-grade reporting
 
-## 🚀 Features
+## Features
 
 ### 1. Climate Data Collection
 
@@ -45,7 +45,7 @@ This system combines:
 - Flash flood alerts
 - Storm surge risk notifications
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 **Core Libraries:**
 
@@ -62,7 +62,7 @@ This system combines:
 - Flask (web interface)
 - Mesa (agent-based simulation)
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 Climate Futures/
@@ -95,7 +95,7 @@ Climate Futures/
 └── README.md
 ```
 
-## 🚀 Installation
+## Installation
 
 ```bash
 # Create virtual environment
@@ -106,7 +106,7 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-## 📊 Usage
+## Usage
 
 ### Quick Start
 
@@ -135,7 +135,7 @@ python app.py
 jupyter notebook notebooks/
 ```
 
-## 📅 Development Timeline
+## Development Timeline
 
 - Data collection & preprocessing
 - Feature engineering
@@ -147,7 +147,7 @@ jupyter notebook notebooks/
 - Final assembly
 - Presentation & documentation
 
-## 🎓 Scientific Approach
+## Scientific Approach
 
 ### Climate Metrics
 
@@ -169,7 +169,7 @@ jupyter notebook notebooks/
 - Comparison with official warnings
 - Sensitivity analysis
 
-## 📈 Future Enhancements
+## Future Enhancements
 
 - [ ] GPU-accelerated neural networks
 - [ ] Reinforcement learning for evacuation planning
@@ -178,15 +178,15 @@ jupyter notebook notebooks/
 - [ ] Multi-island comparison dashboard
 - [ ] Mobile app development
 
-## 🤝 Contributing
+## Contributing
 
 This project is designed for educational and research purposes to help Caribbean communities prepare for climate impacts.
 
-## 📄 License
+## License
 
 MIT License
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - NOAA Climate Data
 - NASA POWER API
