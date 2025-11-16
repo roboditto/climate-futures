@@ -1,4 +1,4 @@
-# 🌎 Climate Futures
+# Climate Futures
 
 A **Python-based climate risk model** that predicts **heatwaves, flooding, and storm surge risk** for Caribbean islands using environmental data, machine learning, and simulation engines.
 
