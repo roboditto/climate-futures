@@ -1,0 +1,208 @@
+# Caribbean Climate Impact System Configuration
+
+# Project Settings
+project:
+  name: "Caribbean Climate Impact System"
+  version: "1.0.0"
+  author: "Climate Futures Team"
+
+# Geographic Settings
+location:
+  default_island: "Jamaica"
+  latitude: 18.1096
+  longitude: -77.2975
+  elevation_range: [0, 2256]  # meters (Blue Mountains)
+  bbox:  # Bounding box [min_lon, min_lat, max_lon, max_lat]
+    - -78.5
+    - 17.7
+    - -76.2
+    - 18.6
+
+# Data Sources
+data_sources:
+  noaa:
+    enabled: true
+    api_url: "https://www.ncei.noaa.gov/access/services/data/v1"
+    datasets: ["GHCND", "GSOD"]
+  
+  nasa_power:
+    enabled: true
+    api_url: "https://power.larc.nasa.gov/api/temporal/daily/point"
+    parameters:
+      - "T2M"        # Temperature at 2 meters
+      - "T2M_MAX"    # Max temperature
+      - "T2M_MIN"    # Min temperature
+      - "PRECTOTCORR"  # Precipitation
+      - "RH2M"       # Relative humidity
+      - "WS10M"      # Wind speed at 10m
+      - "PS"         # Surface pressure
+  
+  era5:
+    enabled: false  # Requires Copernicus account
+    variables:
+      - "2m_temperature"
+      - "total_precipitation"
+      - "sea_surface_temperature"
+      - "10m_u_component_of_wind"
+      - "10m_v_component_of_wind"
+
+# Model Parameters
+models:
+  heatwave:
+    algorithm: "RandomForestClassifier"
+    threshold_temperature: 32.0  # Celsius
+    consecutive_days: 3
+    hyperparameters:
+      n_estimators: 100
+      max_depth: 10
+      random_state: 42
+  
+  rainfall:
+    algorithm: "XGBRegressor"
+    extreme_threshold: 50.0  # mm/day
+    hyperparameters:
+      n_estimators: 150
+      learning_rate: 0.1
+      max_depth: 6
+      random_state: 42
+  
+  flood:
+    algorithm: "RandomForestClassifier"
+    rainfall_threshold: 75.0  # mm/day
+    elevation_weight: 0.4
+    slope_weight: 0.3
+    soil_weight: 0.3
+    hyperparameters:
+      n_estimators: 120
+      max_depth: 12
+      random_state: 42
+
+# Feature Engineering
+features:
+  time_windows:
+    - 3   # 3-day rolling
+    - 7   # weekly
+    - 14  # bi-weekly
+    - 30  # monthly
+  
+  lag_days:
+    - 1
+    - 2
+    - 3
+    - 7
+    - 14
+  
+  climate_indices:
+    - "heat_index"
+    - "humidity_index"
+    - "storm_surge_potential"
+    - "enso_anomaly"
+  
+  derived_features:
+    - "temp_anomaly"
+    - "rainfall_intensity"
+    - "wind_power"
+    - "pressure_tendency"
+
+# Flood Simulation
+flood_simulation:
+  dem_resolution: 30  # meters (SRTM 1-arc second)
+  flow_algorithm: "D8"  # or "D-infinity"
+  manning_coefficient: 0.035  # typical for natural channels
+  timestep: 300  # seconds
+  max_iterations: 1000
+  convergence_threshold: 0.001
+
+# Risk Assessment
+risk_index:
+  weights:
+    flood_risk: 0.40
+    heatwave_prob: 0.30
+    rainfall_severity: 0.30
+  
+  thresholds:
+    low: 30
+    moderate: 50
+    high: 70
+    extreme: 85
+  
+  categories:
+    - name: "Minimal"
+      range: [0, 30]
+      color: "#2ecc71"
+    - name: "Low"
+      range: [30, 50]
+      color: "#f1c40f"
+    - name: "Moderate"
+      range: [50, 70]
+      color: "#e67e22"
+    - name: "High"
+      range: [70, 85]
+      color: "#e74c3c"
+    - name: "Extreme"
+      range: [85, 100]
+      color: "#8e44ad"
+
+# Alert System
+alerts:
+  enabled: true
+  output_formats:
+    - "console"
+    - "pdf"
+    - "json"
+  
+  triggers:
+    heatwave:
+      threshold: 0.7  # 70% probability
+      message: "⚠️ HEATWAVE ALERT: High probability of extreme temperatures in the next 3 days."
+    
+    flood:
+      threshold: 0.6
+      message: "🌊 FLOOD ALERT: Significant flood risk detected. Monitor rainfall closely."
+    
+    rainfall:
+      threshold: 100  # mm
+      message: "🌧️ HEAVY RAINFALL ALERT: Extreme precipitation expected."
+    
+    combined_risk:
+      threshold: 70
+      message: "🚨 HIGH CLIMATE RISK: Multiple hazards detected. Take precautionary measures."
+
+# Visualization
+visualization:
+  style: "seaborn-v0_8-darkgrid"
+  color_palette: "viridis"
+  figure_dpi: 300
+  save_format: "png"
+  
+  maps:
+    tile_layer: "OpenStreetMap"
+    default_zoom: 10
+    marker_colors:
+      low: "green"
+      moderate: "yellow"
+      high: "orange"
+      extreme: "red"
+
+# Data Storage
+storage:
+  raw_data_path: "data/raw/"
+  processed_data_path: "data/processed/"
+  models_path: "data/models/"
+  cache_path: "data/cache/"
+  results_path: "results/"
+  reports_path: "reports/"
+
+# Training
+training:
+  test_size: 0.2
+  validation_size: 0.1
+  cross_validation_folds: 5
+  random_state: 42
+  n_jobs: -1  # Use all CPU cores
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/climate_system.log"
