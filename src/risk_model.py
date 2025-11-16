@@ -5,7 +5,7 @@ Combines all predictions into a unified 0-100 risk score.
 
 import pandas as pd
 import numpy as np
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 import logging
 
 
@@ -76,7 +76,7 @@ class ClimateRiskIndex:
         
         return risk_score
     
-    def get_risk_category(self, risk_score: float) -> Dict[str, any]:
+    def get_risk_category(self, risk_score: float) -> Dict[str, Any]:
         """
         Get risk category based on score.
         

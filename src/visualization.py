@@ -1,8 +1,3 @@
-"""
-Visualization Module - Days 10-11
-Creates comprehensive visualizations and dashboards.
-"""
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -248,8 +243,9 @@ class ClimateVisualizer:
             plt.savefig(save_path, dpi=self.viz_config.get('figure_dpi', 300), 
                        bbox_inches='tight')
             self.logger.info(f"Heatwave forecast saved to {save_path}")
-        
-        plt.show()
+            plt.close()
+        else:
+            plt.show()
     
     def plot_rainfall_forecast(self, df: pd.DataFrame,
                               days_ahead: int = 7,
@@ -270,6 +266,9 @@ class ClimateVisualizer:
         
         fig, ax = plt.subplots(figsize=(12, 6))
         
+        # Get extreme threshold from config
+        extreme_threshold = self.config['models']['rainfall']['extreme_threshold']
+        
         # Rainfall bars
         rainfall_col = 'rainfall_pred' if 'rainfall_pred' in recent.columns else 'precipitation'
         if rainfall_col in recent.columns:
@@ -277,7 +276,6 @@ class ClimateVisualizer:
                          color='skyblue', edgecolor='navy', linewidth=1.5)
             
             # Color bars by intensity
-            extreme_threshold = self.config['models']['rainfall']['extreme_threshold']
             for i, (idx, row) in enumerate(recent.iterrows()):
                 rainfall = row[rainfall_col]
                 if rainfall > extreme_threshold:
@@ -303,8 +301,9 @@ class ClimateVisualizer:
             plt.savefig(save_path, dpi=self.viz_config.get('figure_dpi', 300),
                        bbox_inches='tight')
             self.logger.info(f"Rainfall forecast saved to {save_path}")
-        
-        plt.show()
+            plt.close()
+        else:
+            plt.show()
     
     def plot_risk_gauge(self, risk_score: float,
                        save_path: Optional[str] = None) -> None:
@@ -374,9 +373,10 @@ class ClimateVisualizer:
         """
         # Prepare data
         df_cal = df.copy()
-        df_cal['year'] = df_cal.index.year
-        df_cal['month'] = df_cal.index.month
-        df_cal['day'] = df_cal.index.day
+        dt_index = pd.to_datetime(df_cal.index)
+        df_cal['year'] = dt_index.year
+        df_cal['month'] = dt_index.month
+        df_cal['day'] = dt_index.day
         
         # Pivot for heatmap
         pivot = df_cal.pivot_table(
@@ -402,8 +402,9 @@ class ClimateVisualizer:
             plt.savefig(save_path, dpi=self.viz_config.get('figure_dpi', 300),
                        bbox_inches='tight')
             self.logger.info(f"Calendar heatmap saved to {save_path}")
-        
-        plt.show()
+            plt.close()
+        else:
+            plt.show()
 
 
 def main():

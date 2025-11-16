@@ -1,8 +1,3 @@
-"""
-Feature Engineering Module - Days 3-4
-Creates scientifically meaningful features for climate prediction models.
-"""
-
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional
@@ -48,13 +43,16 @@ class ClimateFeatureEngineer:
         self.logger.info("Creating temporal features...")
         df_temporal = df.copy()
         
+        # Convert index to DatetimeIndex for attribute access
+        dt_index = pd.to_datetime(df_temporal.index)
+        
         # Basic temporal features
-        df_temporal['year'] = df_temporal.index.year
-        df_temporal['month'] = df_temporal.index.month
-        df_temporal['day'] = df_temporal.index.day
-        df_temporal['day_of_year'] = df_temporal.index.dayofyear
-        df_temporal['week_of_year'] = df_temporal.index.isocalendar().week
-        df_temporal['day_of_week'] = df_temporal.index.dayofweek
+        df_temporal['year'] = dt_index.year
+        df_temporal['month'] = dt_index.month
+        df_temporal['day'] = dt_index.day
+        df_temporal['day_of_year'] = dt_index.dayofyear
+        df_temporal['week_of_year'] = dt_index.isocalendar().week
+        df_temporal['day_of_week'] = dt_index.dayofweek
         
         # Cyclical encoding for seasonality (sine/cosine transform)
         df_temporal['month_sin'] = np.sin(2 * np.pi * df_temporal['month'] / 12)
@@ -258,8 +256,8 @@ class ClimateFeatureEngineer:
         if 'heat_index' not in df.columns:
             if 'temperature' in df.columns and 'humidity' in df.columns:
                 df_indices['heat_index'] = calculate_heat_index(
-                    df['temperature'].values,
-                    df['humidity'].values
+                    np.asarray(df['temperature'].values),
+                    np.asarray(df['humidity'].values)
                 )
         
         # Humidity Index (discomfort index)
@@ -272,8 +270,8 @@ class ClimateFeatureEngineer:
         if 'storm_surge_potential' not in df.columns:
             if 'wind_speed' in df.columns and 'pressure' in df.columns:
                 df_indices['storm_surge_potential'] = calculate_storm_surge_potential(
-                    df['wind_speed'].values,
-                    df['pressure'].values
+                    np.asarray(df['wind_speed'].values),
+                    np.asarray(df['pressure'].values)
                 )
         
         # Drought Index (simplified using rainfall)

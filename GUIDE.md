@@ -1,6 +1,6 @@
 # 🌎 Caribbean Climate Impact System - Complete Guide
 
-## 🚀 Quick Start (5 Minutes)
+## Quick Start (5 Minutes)
 
 ### Option 1: Automated Demo
 
@@ -44,9 +44,9 @@ jupyter notebook notebooks/01_complete_climate_system.ipynb
 
 ---
 
-## 📚 Detailed Component Guide
+## Detailed Component Guide
 
-### 1. Data Preprocessing (Days 1-2)
+### 1. Data Preprocessing
 
 **Module:** `src/data_preprocessing.py`
 
@@ -77,7 +77,7 @@ df_processed = loader.calculate_derived_metrics(df_clean)
 
 ---
 
-### 2. Feature Engineering (Days 3-4)
+### 2. Feature Engineering
 
 **Module:** `src/features.py`
 
@@ -103,7 +103,7 @@ print(f"Created {len(df_features.columns)} features")
 
 ---
 
-### 3. Machine Learning Models (Days 5-6)
+### 3. Machine Learning Models
 
 #### A. Heatwave Prediction Model
 
@@ -194,7 +194,7 @@ metrics = predictor.train(X, y)
 
 ---
 
-### 4. Flood Simulation Engine (Days 7-8)
+### 4. Flood Simulation Engine
 
 **Module:** `src/flood_simulation.py`
 
@@ -272,7 +272,7 @@ print(f"Risk: {risk_score}/100 - {category['name']}")
 
 ---
 
-### 6. Visualization Dashboard (Days 10-11)
+### 6. Visualization Dashboard
 
 **Module:** `src/visualization.py`
 
@@ -348,7 +348,7 @@ alert_system.generate_daily_report(risk_summary, alerts)
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 All settings are in `config/config.yaml`:
 
@@ -380,7 +380,7 @@ risk_index:
 
 ---
 
-## 📊 Data Sources
+## Data Sources
 
 ### Supported Sources
 
@@ -403,7 +403,7 @@ risk_index:
 
 ---
 
-## 🧪 Testing & Validation
+## Testing & Validation
 
 ### Model Performance
 
@@ -427,7 +427,7 @@ pytest --cov=src tests/
 
 ---
 
-## 📈 Results & Outputs
+## Results & Outputs
 
 ### Generated Files
 
@@ -457,7 +457,7 @@ pytest --cov=src tests/
 
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 ### 1. Daily Risk Assessment
 
@@ -485,7 +485,7 @@ Demonstrate climate modeling techniques.
 
 ---
 
-## 🚀 Advanced Features
+## Advanced Features
 
 ### Planned Enhancements
 
@@ -500,7 +500,7 @@ Demonstrate climate modeling techniques.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 ### Adding New Features
 
@@ -512,7 +512,7 @@ Demonstrate climate modeling techniques.
 
 ---
 
-## 📄 License & Attribution
+## License & Attribution
 
 ### MIT License
 
@@ -524,7 +524,7 @@ Data sources:
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built for Caribbean climate resilience and community preparedness.
 
@@ -536,7 +536,7 @@ Special thanks to:
 
 ---
 
-## 📞 Support
+## Support
 
 For issues or questions:
 
@@ -547,4 +547,4 @@ For issues or questions:
 
 ---
 
-**Stay informed. Stay prepared. Stay safe.** 🌴⛈️🌊
+**Stay informed. Stay prepared. Stay safe.**

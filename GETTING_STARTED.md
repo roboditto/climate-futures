@@ -13,7 +13,7 @@ Welcome! This guide will help you get the system running in **under 10 minutes**
 
 ---
 
-## 🚀 Installation Steps
+## Installation Steps
 
 ### Step 1: Navigate to Project Directory
 
@@ -46,9 +46,9 @@ This will install:
 
 ---
 
-## 🎯 Choose Your Experience
+## Choose Your Experience
 
-### Option A: 🚀 Quick Demo (Recommended for First Time)
+### Option A: Quick Demo (Recommended for First Time)
 
 Run the automated demonstration:
 
@@ -76,7 +76,7 @@ python quickstart.py
 
 ---
 
-### Option B: 📊 Command-Line Interface
+### Option B: Command-Line Interface
 
 For more control, use the CLI:
 
@@ -108,7 +108,7 @@ python cli.py --daily-report
 
 ---
 
-### Option C: 📓 Interactive Jupyter Notebook
+### Option C: Interactive Jupyter Notebook
 
 For exploratory analysis:
 
@@ -127,7 +127,7 @@ Then open: `notebooks/01_complete_climate_system.ipynb`
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 Climate Futures/
@@ -163,7 +163,7 @@ Climate Futures/
 
 ---
 
-## 🎨 Understanding the Outputs
+## Understanding the Outputs
 
 ### 1. Risk Dashboard (`results/risk_dashboard.html`)
 
@@ -216,12 +216,12 @@ Component Analysis:
   - Rainfall Severity: 12.5
 
 Recommendations:
-  1. ✅ Low climate risk - normal precautions apply
+Low climate risk - normal precautions apply
 ```
 
 ---
 
-## 🔧 Customization
+## Customization
 
 ### Adjust Risk Thresholds
 
@@ -251,19 +251,19 @@ location:
 
 ---
 
-## 🧪 Verify Installation
+## Verify Installation
 
 Run this quick test:
 
 ```powershell
-python -c "import pandas, sklearn, xgboost, plotly; print('✅ All packages installed correctly!')"
+python -c "import pandas, sklearn, xgboost, plotly; print('All packages installed correctly!')"
 ```
 
-Expected output: `✅ All packages installed correctly!`
+Expected output: `All packages installed correctly!`
 
 ---
 
-## 📊 Sample Workflow
+## Sample Workflow
 
 ### Typical Daily Use
 
@@ -291,7 +291,7 @@ Launch Jupyter notebook for deeper analysis.
 
 ---
 
-## ❗ Troubleshooting
+## Troubleshooting
 
 ### Issue: Import errors
 
@@ -323,7 +323,7 @@ pip install pyqt5
 
 ---
 
-## 🎓 Learning Path
+## Learning Path
 
 ### Beginner
 
@@ -346,7 +346,7 @@ pip install pyqt5
 
 ---
 
-## 📚 Next Steps
+## Next Steps
 
 1. **Read GUIDE.md** for detailed component documentation
 2. **Explore notebooks/** for interactive examples
@@ -356,7 +356,7 @@ pip install pyqt5
 
 ---
 
-## 🌟 Key Features to Try
+## Key Features to Try
 
 ### 1. Flood Simulation
 
@@ -381,7 +381,7 @@ python src/models/heatwave.py
 
 ---
 
-## 💡 Tips
+## Tips
 
 1. **Start with synthetic data** (fast) before trying real NASA POWER data
 2. **Use smaller date ranges** (--days 365) for faster testing
@@ -391,7 +391,7 @@ python src/models/heatwave.py
 
 ---
 
-## 🎉 You're Ready
+## You're Ready
 
 The Caribbean Climate Impact System is now set up and ready to use.
 
@@ -410,5 +410,3 @@ python quickstart.py
 ---
 
 **Questions?** Check `GUIDE.md` for detailed documentation.
-
-**Happy climate modeling!** 🌴⛈️📊

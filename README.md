@@ -137,15 +137,15 @@ jupyter notebook notebooks/
 
 ## 📅 Development Timeline
 
-- **Days 1-2:** Data collection & preprocessing
-- **Days 3-4:** Feature engineering
-- **Days 5-6:** ML model training
-- **Days 7-8:** Flood simulation engine
-- **Day 9:** Climate risk index
-- **Days 10-11:** Visualization dashboard
-- **Day 12:** Alert system
-- **Day 13:** Final assembly
-- **Day 14:** Presentation & documentation
+- Data collection & preprocessing
+- Feature engineering
+- ML model training
+- Flood simulation engine
+- Climate risk index
+- Visualization dashboard
+- Alert system
+- Final assembly
+- Presentation & documentation
 
 ## 🎓 Scientific Approach
 

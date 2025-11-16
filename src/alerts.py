@@ -249,7 +249,7 @@ class ClimateAlertSystem:
         filepath : str
             Output file path
         """
-        with open(filepath, 'w') as f:
+        with open(filepath, 'w', encoding='utf-8') as f:
             json.dump({
                 'generated_at': datetime.now().isoformat(),
                 'alert_count': len(alerts),
@@ -337,7 +337,7 @@ class ClimateAlertSystem:
         
         # Save if path provided
         if save_path:
-            with open(save_path, 'w') as f:
+            with open(save_path, 'w', encoding='utf-8') as f:
                 f.write(report_text)
             self.logger.info(f"Daily report saved to {save_path}")
         

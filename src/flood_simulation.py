@@ -1,8 +1,3 @@
-"""
-Hydrological Flood Simulation Engine - Days 7-8
-Simulates water flow and accumulation using terrain data.
-"""
-
 import numpy as np
 from scipy import ndimage
 from typing import Dict, Tuple, Optional
@@ -353,8 +348,9 @@ class FloodSimulator:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
             self.logger.info(f"Simulation plot saved to {save_path}")
-        
-        plt.show()
+            plt.close()  # Close the figure instead of showing it
+        else:
+            plt.show()  # Only show if not saving
 
 
 def main():

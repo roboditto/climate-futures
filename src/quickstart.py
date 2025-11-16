@@ -4,7 +4,15 @@ Runs a complete demonstration of all features.
 """
 
 import sys
+import os
 from pathlib import Path
+import numpy as np
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
@@ -19,7 +27,6 @@ from risk_model import ClimateRiskIndex
 from visualization import ClimateVisualizer
 from alerts import ClimateAlertSystem
 from flood_simulation import FloodSimulator
-import os
 
 
 def main():
@@ -50,6 +57,7 @@ def main():
     # Create output directories
     os.makedirs('results', exist_ok=True)
     os.makedirs('reports', exist_ok=True)
+    os.makedirs('data/models', exist_ok=True)
     
     # Step 1: Generate/Load Data
     print("\n📊 STEP 1: Generating Climate Data...")
@@ -102,13 +110,21 @@ def main():
     print("\n🔮 STEP 4: Generating Predictions...")
     print("-" * 80)
     
+    # Predictions
     df['heatwave_prob'] = heatwave_model.predict(X_hw)
-    df['rainfall_pred'] = rainfall_model.predict(X_rf)
+    
+    # Rainfall predictions are 1-day ahead, so we need to align them
+    rainfall_preds = rainfall_model.predict(X_rf)
+    # Initialize with NaN
+    df['rainfall_pred'] = np.nan
+    # Assign predictions to the rows that have valid features (exclude last day)
+    df.loc[df.index[:len(rainfall_preds)], 'rainfall_pred'] = rainfall_preds
+    
     df['flood_prob'] = flood_model.predict(X_fl)
     
-    # Calculate risk scores
+    # Calculate risk scores (only for rows with all predictions)
     df = risk_calculator.calculate_batch_risk(df)
-    print(f"✅ Predictions generated for {len(df)} days")
+    print(f"✅ Predictions generated for {len(df)} days ({df['rainfall_pred'].notna().sum()} with rainfall forecast)")
     
     # Step 5: Current Risk Assessment
     print("\n📊 STEP 5: Current Climate Risk Assessment...")

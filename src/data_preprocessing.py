@@ -1,8 +1,3 @@
-"""
-Data Preprocessing Module - Days 1-2
-Handles data collection, cleaning, and preprocessing for the Caribbean Climate System.
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -144,19 +139,19 @@ class ClimateDataLoader:
         
         if start_date is None:
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=days)
+            start_date_dt = end_date - timedelta(days=days)
         else:
-            start_date = pd.to_datetime(start_date)
-            end_date = start_date + timedelta(days=days)
+            start_date_dt = pd.to_datetime(start_date)
+            end_date = start_date_dt + timedelta(days=days)
         
         # Create date range
-        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+        dates = pd.date_range(start=start_date_dt, end=end_date, freq='D')
         
         np.random.seed(42)
         
         # Generate realistic Caribbean climate data
         # Temperature: seasonal variation + daily noise
-        day_of_year = dates.dayofyear
+        day_of_year = dates.dayofyear.values  # Convert to numpy array
         temp_seasonal = 27 + 3 * np.sin(2 * np.pi * (day_of_year - 80) / 365)
         temperature = temp_seasonal + np.random.normal(0, 2, len(dates))
         
@@ -174,7 +169,8 @@ class ClimateDataLoader:
         precipitation = rainfall_base * rainfall_noise
         # Add some extreme events
         extreme_events = np.random.random(len(dates)) < 0.05  # 5% chance
-        precipitation[extreme_events] *= np.random.uniform(5, 15, extreme_events.sum())
+        extreme_indices = np.where(extreme_events)[0]
+        precipitation[extreme_indices] *= np.random.uniform(5, 15, len(extreme_indices))
         
         # Wind speed: 3-8 m/s typical
         wind_speed = 5 + 2 * np.sin(2 * np.pi * day_of_year / 365) + np.random.normal(0, 1.5, len(dates))
@@ -276,8 +272,8 @@ class ClimateDataLoader:
         # Heat index
         if 'temperature' in df.columns and 'humidity' in df.columns:
             df_derived['heat_index'] = calculate_heat_index(
-                df['temperature'].values,
-                df['humidity'].values
+                np.asarray(df['temperature'].values),
+                np.asarray(df['humidity'].values)
             )
         
         # Temperature anomaly (from mean)
@@ -294,13 +290,14 @@ class ClimateDataLoader:
         # Storm surge potential
         if 'wind_speed' in df.columns and 'pressure' in df.columns:
             df_derived['storm_surge_potential'] = calculate_storm_surge_potential(
-                df['wind_speed'].values,
-                df['pressure'].values
+                np.asarray(df['wind_speed'].values),
+                np.asarray(df['pressure'].values)
             )
         
         # Day of year (for seasonality)
-        df_derived['day_of_year'] = df_derived.index.dayofyear
-        df_derived['month'] = df_derived.index.month
+        dt_index = pd.to_datetime(df_derived.index)
+        df_derived['day_of_year'] = dt_index.dayofyear
+        df_derived['month'] = dt_index.month
         
         self.logger.info(f"Added {len(df_derived.columns) - len(df.columns)} derived metrics")
         return df_derived

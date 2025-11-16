@@ -212,12 +212,21 @@ class ClimateSystem:
         """
         latest = df.iloc[-1]
         
+        # Format date safely - check if index name is a timestamp
+        date_str = None
+        try:
+            import pandas as pd
+            if isinstance(latest.name, pd.Timestamp):
+                date_str = latest.name.strftime('%Y-%m-%d')
+        except:
+            pass
+        
         summary = self.risk_calculator.generate_risk_summary(
             flood_prob=latest['flood_prob'],
             heatwave_prob=latest['heatwave_prob'],
             rainfall_mm=latest['rainfall_pred'],
             temperature=latest.get('temperature', 28),
-            date=latest.name.strftime('%Y-%m-%d') if hasattr(latest.name, 'strftime') else None
+            date=date_str
         )
         
         return summary

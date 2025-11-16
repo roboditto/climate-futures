@@ -156,24 +156,39 @@ class HeatwavePredictor:
         # Train model
         self.model.fit(X_train, y_train)
         
+        # Check if model learned both classes
+        n_classes = len(self.model.classes_)
+        
         # Predictions
         y_pred = self.model.predict(X_test)
-        y_pred_proba = self.model.predict_proba(X_test)[:, 1]
+        
+        # Handle single class case
+        if n_classes == 1:
+            self.logger.warning(f"Only one class present in training data: {self.model.classes_[0]}")
+            y_pred_proba = np.zeros(len(X_test))  # All probabilities are 0 for the positive class
+            roc_auc = 0.5  # Random performance
+        else:
+            y_pred_proba = self.model.predict_proba(X_test)[:, 1]
+            roc_auc = roc_auc_score(y_test, y_pred_proba)
         
         # Metrics
         metrics = {
             'accuracy': self.model.score(X_test, y_test),
             'classification_report': classification_report(y_test, y_pred),
             'confusion_matrix': confusion_matrix(y_test, y_pred),
-            'roc_auc': roc_auc_score(y_test, y_pred_proba)
+            'roc_auc': roc_auc
         }
         
-        # Cross-validation
-        cv_scores = cross_val_score(
-            self.model, X_train, y_train, cv=5, scoring='roc_auc'
-        )
-        metrics['cv_auc_mean'] = cv_scores.mean()
-        metrics['cv_auc_std'] = cv_scores.std()
+        # Cross-validation (only if we have both classes)
+        if n_classes > 1:
+            cv_scores = cross_val_score(
+                self.model, X_train, y_train, cv=5, scoring='roc_auc'
+            )
+            metrics['cv_auc_mean'] = cv_scores.mean()
+            metrics['cv_auc_std'] = cv_scores.std()
+        else:
+            metrics['cv_auc_mean'] = 0.5
+            metrics['cv_auc_std'] = 0.0
         
         # Feature importance
         self.feature_importance = pd.DataFrame({
@@ -204,6 +219,10 @@ class HeatwavePredictor:
         
         # Handle missing values
         X_clean = X.fillna(X.mean()).replace([np.inf, -np.inf], np.nan).fillna(X.mean())
+        
+        # Handle single class case
+        if len(self.model.classes_) == 1:
+            return np.zeros(len(X_clean))  # All probabilities are 0 for positive class
         
         return self.model.predict_proba(X_clean)[:, 1]
     

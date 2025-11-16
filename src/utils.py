@@ -63,9 +63,9 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     if config_path is None:
         # Get the project root directory
         project_root = Path(__file__).parent.parent
-        config_path = project_root / 'config' / 'config.yaml'
+        config_path = str(project_root / 'config' / 'config.yaml')
     
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
     
     return config
@@ -112,7 +112,7 @@ def calculate_heat_index(temperature_c: np.ndarray,
         Heat index in Celsius
     """
     # Convert to Fahrenheit for calculation
-    T = temperature_c * 9/5 + 32
+    T = temperature_c * 9.0/5.0 + 32
     RH = relative_humidity
     
     # Rothfusz regression coefficients
@@ -167,7 +167,7 @@ def calculate_storm_surge_potential(wind_speed_ms: np.ndarray,
     
     # Combine factors (normalize to 0-100)
     surge_potential = (0.6 * wind_stress + 0.4 * pressure_deficit * 10)
-    surge_potential = np.clip(surge_potential / 5, 0, 100)  # Scale to 0-100
+    surge_potential = np.clip(surge_potential / 5.0, 0, 100)  # Scale to 0-100
     
     return surge_potential
 
@@ -370,12 +370,12 @@ def calculate_anomaly(values: np.ndarray,
         Standardized anomaly
     """
     if baseline_mean is None:
-        baseline_mean = np.nanmean(values)
+        baseline_mean = float(np.nanmean(values))
     
     if baseline_std is None:
-        baseline_std = np.nanstd(values)
+        baseline_std = float(np.nanstd(values))
     
-    if baseline_std == 0:
+    if baseline_std == 0 or baseline_std is None:
         return np.zeros_like(values)
     
     anomaly = (values - baseline_mean) / baseline_std
