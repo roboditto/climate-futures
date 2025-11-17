@@ -1,4 +1,4 @@
-# 🌎 Caribbean Climate Impact System - Complete Guide
+# Caribbean Climate Impact System - Complete Guide
 
 ## Quick Start (5 Minutes)
 
