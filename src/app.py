@@ -301,7 +301,7 @@ def main():
                     height=400
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             
             # Active alerts
             st.subheader("🚨 Active Alerts")
@@ -378,7 +378,7 @@ def main():
                     height=350
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
         
         with col2:
             if 'precipitation' in df_filtered.columns:
@@ -399,7 +399,7 @@ def main():
                     height=350
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
         
         # Additional metrics
         st.subheader("💨 Wind & Pressure")
@@ -415,7 +415,7 @@ def main():
                     labels={'wind_speed': 'Wind Speed (m/s)', 'index': 'Date'}
                 )
                 fig.update_traces(line_color='green')
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
         
         with col2:
             if 'pressure' in df_filtered.columns:
@@ -426,7 +426,7 @@ def main():
                     labels={'pressure': 'Pressure (hPa)', 'index': 'Date'}
                 )
                 fig.update_traces(line_color='purple')
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
     
     with tab3:
         st.header("Risk Analysis")
@@ -485,7 +485,7 @@ def main():
                     height=400
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
     
     with tab4:
         st.header("Flood Simulation")
@@ -549,7 +549,7 @@ def main():
                     height=500
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
                 
                 # Statistics
                 max_depth = st.session_state['water_depth'].max()
@@ -597,7 +597,7 @@ def main():
                     height=300
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             
             with col2:
                 st.markdown("**Flood Probability**")
@@ -624,7 +624,7 @@ def main():
                     height=300
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
         
         # Rainfall forecast
         if 'rainfall_pred' in df_filtered.columns:
@@ -661,7 +661,7 @@ def main():
                 height=400
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
     
     # Footer
     st.markdown("---")
