@@ -1,10 +1,10 @@
-# 🎉 Getting Started with the Caribbean Climate Impact System
+# Getting Started with the Caribbean Climate Impact System
 
 Welcome! This guide will help you get the system running in **under 10 minutes**.
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
 - **Python 3.10+** installed
 - **pip** package manager
