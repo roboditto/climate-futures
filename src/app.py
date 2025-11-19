@@ -1,5 +1,5 @@
 """
-Streamlit Dashboard for Caribbean Climate Impact Simulation & Early Warning System
+Streamlit Dashboard for Climate Futures
 Interactive web interface for climate risk analysis and visualization.
 """
 

@@ -50,7 +50,7 @@ This will install:
 
 ### Option A: Quick Demo (Recommended for First Time)
 
-Run the automated demonstration:
+Run the automated demonstration in the src directory:
 
 ```powershell
 python quickstart.py
