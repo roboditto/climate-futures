@@ -4,7 +4,7 @@ Welcome! This guide will help you get the system running in **under 10 minutes**
 
 ---
 
-## Prerequisites
+[## Prerequisites
 
 - **Python 3.10+** installed
 - **pip** package manager
@@ -131,34 +131,40 @@ Then open: `notebooks/01_complete_climate_system.ipynb`
 
 ```text
 Climate Futures/
-├── config/
-│   └── config.yaml          # All settings (thresholds, weights, etc.)
-├── data/
-│   ├── raw/                 # Original data
-│   ├── processed/           # Cleaned data
-│   └── models/              # Trained ML models (*.pkl)
 ├── src/
-│   ├── data_preprocessing.py   # Data loading & cleaning
-│   ├── features.py             # Feature engineering
-│   ├── models/
-│   │   ├── heatwave.py         # Heatwave classifier
-│   │   ├── rainfall.py         # Rainfall regressor
-│   │   └── flood.py            # Flood classifier
-│   ├── flood_simulation.py     # Hydrological simulation
-│   ├── risk_model.py           # Climate risk index
-│   ├── visualization.py        # All visualizations
-│   ├── alerts.py               # Alert generation
-│   └── utils.py                # Helper functions
+│  ├── config/
+│  │   └── config.yaml          # All settings (thresholds, weights, etc.)
+│  │
+│  ├── data/
+│  │    ├── cache/               # Fast memory retrieval for frequently used data    
+│  │    ├── raw/                 # Original data
+│  │    ├── processed/           # Cleaned data
+│  │    └── models/              # Trained ML models (*.pkl)
+│  ├── data_preprocessing.py   # Data loading & cleaning
+│  ├── features.py             # Feature engineering
+│  ├── models/
+│  │    ├── heatwave.py         # Heatwave classifier
+│  │    ├── rainfall.py         # Rainfall regressor
+│  │    └── flood.py            # Flood classifier
+│  ├── flood_simulation.py     # Hydrological simulation
+│  ├── risk_model.py           # Climate risk index
+│  ├── cli.py                  # Command-line interface
+│  ├── visualization.py        # All visualizations
+│  ├── alerts.py               # Alert generation
+│  ├── utils.py                # Helper functions
+│  └── quickstart.py           # Automated demo
+├── logs/
+│   └── climate_system.log
 ├── notebooks/
 │   └── 01_complete_climate_system.ipynb
 ├── reports/                 # Generated reports
 ├── results/                 # Visualizations
-├── tests/                   # Unit tests
-├── cli.py                   # Command-line interface
-├── quickstart.py            # Automated demo
-├── README.md                # Project overview
+├── GETTING_STARTED.md       # Prerequisites and approaches to using the app
 ├── GUIDE.md                 # Detailed documentation
-└── requirements.txt         # Python dependencies
+├── PROJECT_SUMMARY.md       # Project abstract with additional coverage
+├── README.md                # Project overview
+├── requirements.txt         # Python dependencies
+└── STREAMLIT_GUIDE.md       # Guide when using streamlit to view app
 ```
 
 ---

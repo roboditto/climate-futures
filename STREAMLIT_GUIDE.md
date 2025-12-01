@@ -1,4 +1,4 @@
-# 🌎 Streamlit Dashboard Guide
+# Streamlit Dashboard Guide
 
 ## Interactive Web Dashboard for Caribbean Climate System
 
@@ -6,7 +6,7 @@ The Streamlit dashboard provides a modern, interactive web interface for explori
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Streamlit (if not already installed)
 
@@ -45,7 +45,7 @@ The dashboard will automatically open in your default web browser at `http://loc
 
 ---
 
-## 📊 Dashboard Features
+## Dashboard Features
 
 ### **Tab 1: Overview**
 
@@ -83,7 +83,7 @@ The dashboard will automatically open in your default web browser at `http://loc
 
 ---
 
-## ⚙️ Configuration Options
+## Configuration Options
 
 ### Sidebar Settings
 
@@ -107,7 +107,7 @@ The dashboard will automatically open in your default web browser at `http://loc
 
 ---
 
-## 🎨 Features & Capabilities
+## Features & Capabilities
 
 ### Interactive Visualizations
 
@@ -135,7 +135,7 @@ The dashboard will automatically open in your default web browser at `http://loc
 
 ---
 
-## 💡 Usage Tips
+## Usage Tips
 
 ### For Best Performance
 
@@ -175,7 +175,7 @@ The dashboard will automatically open in your default web browser at `http://loc
 
 ---
 
-## 🔧 Customization
+## Customization
 
 ### Modify Alert Colors
 
@@ -211,7 +211,7 @@ heatwave_threshold = st.sidebar.slider("Heatwave Alert (%)", 0, 100, 70)  # Chan
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Dashboard Won't Start
 
@@ -250,7 +250,7 @@ streamlit run app.py --server.port 8502
 
 ---
 
-## 📱 Deployment Options
+## Deployment Options
 
 ### Local Network Access
 
@@ -287,7 +287,7 @@ CMD ["streamlit", "run", "app.py"]
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [Streamlit Documentation](https://docs.streamlit.io)
 - [Plotly Graphing Library](https://plotly.com/python/)
@@ -296,7 +296,7 @@ CMD ["streamlit", "run", "app.py"]
 
 ---
 
-## 🤝 Support
+## Support
 
 For issues or questions:
 

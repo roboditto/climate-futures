@@ -42,6 +42,13 @@ python cli.py --risk-score
 jupyter notebook notebooks/01_complete_climate_system.ipynb
 ```
 
+### Show Dashbaord
+
+```bash
+cd src
+streamlit run app.py
+```
+
 ---
 
 ## Detailed Component Guide

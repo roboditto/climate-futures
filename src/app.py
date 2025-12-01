@@ -27,6 +27,7 @@ from risk_model import ClimateRiskIndex
 from visualization import ClimateVisualizer
 from alerts import ClimateAlertSystem
 from flood_simulation import FloodSimulator
+from predictions import generate_predictions
 
 # Page configuration
 st.set_page_config(
@@ -171,6 +172,14 @@ def main():
     if df is None:
         st.stop()
         return
+    
+    # Generate predictions if not present
+    with st.spinner("Generating predictions..."):
+        try:
+            df = generate_predictions(df, system)
+        except Exception as e:
+            system['logger'].exception('generate_predictions failed')
+            st.warning(f"⚠️ Prediction generation failed: {e}")
     
     # Sidebar
     st.sidebar.title("⚙️ Settings")
@@ -518,6 +527,9 @@ def main():
                 with st.spinner("Running flood simulation..."):
                     simulator = FloodSimulator(system['config'], system['logger'])
                     
+                    # Extract country from location
+                    country = location.split(',')[-1].strip()
+                    
                     # Generate synthetic DEM
                     dem = simulator.generate_synthetic_dem(size=(grid_size, grid_size))
                     
@@ -531,10 +543,15 @@ def main():
                     # Store in session state
                     st.session_state['dem'] = dem
                     st.session_state['water_depth'] = water_depth
+                    st.session_state['selected_country'] = country
         
         with col2:
             if 'water_depth' in st.session_state:
                 st.subheader("🗺️ Flood Depth Map")
+                
+                # Get country from session state
+                country_title = st.session_state.get('selected_country', '')
+                title = f"Simulated Flood Water Depth - {country_title}" if country_title else "Simulated Flood Water Depth"
                 
                 fig = go.Figure(data=go.Heatmap(
                     z=st.session_state['water_depth'],
@@ -543,7 +560,7 @@ def main():
                 ))
                 
                 fig.update_layout(
-                    title="Simulated Flood Water Depth",
+                    title=title,
                     xaxis_title="X (grid cells)",
                     yaxis_title="Y (grid cells)",
                     height=500
