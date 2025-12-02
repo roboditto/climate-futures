@@ -1,5 +1,5 @@
 """
-Flood Risk Model - Day 6
+Flood Risk Model
 Predicts flood susceptibility using terrain and climate data.
 """
 

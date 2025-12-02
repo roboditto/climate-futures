@@ -1,4 +1,4 @@
-# Caribbean Climate Impact System - Complete Guide
+# Climate Futures System - Complete Guide
 
 ## Quick Start (5 Minutes)
 
@@ -238,7 +238,7 @@ simulator.plot_simulation(dem, water_depth)
 
 ---
 
-### 5. Climate Risk Index (Day 9)
+### 5. Climate Risk Index
 
 **Module:** `src/risk_model.py`
 
@@ -317,7 +317,7 @@ viz.plot_risk_gauge(current_risk_score)
 
 ---
 
-### 7. Alert Generation System (Day 12)
+### 7. Alert Generation System
 
 **Module:** `src/alerts.py`
 

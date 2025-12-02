@@ -1,5 +1,5 @@
 """
-Rainfall Prediction Model - Day 6
+Rainfall Prediction Model
 Regression model to predict daily rainfall extremes.
 """
 

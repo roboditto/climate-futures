@@ -31,7 +31,7 @@ from predictions import generate_predictions
 
 # Page configuration
 st.set_page_config(
-    page_title="Caribbean Climate Risk Dashboard",
+    page_title="Climate Futures Risk Dashboard",
     page_icon="🌎",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -157,7 +157,7 @@ def get_risk_category(score):
 
 def main():
     # Header
-    st.markdown('<h1 class="main-header">🌎 Caribbean Climate Impact Dashboard</h1>', 
+    st.markdown('<h1 class="main-header">🌎 Climate Futures Dashboard</h1>', 
                 unsafe_allow_html=True)
     st.markdown("**Real-time Climate Risk Analysis & Early Warning System**")
     
@@ -684,7 +684,7 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #7f8c8d;'>
-        <p>Caribbean Climate Impact Simulation & Early Warning System</p>
+        <p>Climate Futures Simulation & Early Warning System</p>
         <p>Data updates daily | Last updated: {}</p>
     </div>
     """.format(datetime.now().strftime("%Y-%m-%d %H:%M")), unsafe_allow_html=True)

@@ -1,8 +1,8 @@
-# Caribbean Climate Impact System Configuration
+# Climate Futures System Configuration
 
 # Project Settings
 project:
-  name: "Caribbean Climate Impact System"
+  name: "Climate Futures System"
   version: "1.0.0"
   author: "Climate Futures Team"
 

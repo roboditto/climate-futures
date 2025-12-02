@@ -1,6 +1,6 @@
 # Streamlit Dashboard Guide
 
-## Interactive Web Dashboard for Caribbean Climate System
+## Interactive Web Dashboard for Climate Futures System
 
 The Streamlit dashboard provides a modern, interactive web interface for exploring climate data, viewing risk assessments, and running flood simulations in real-time.
 

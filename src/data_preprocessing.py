@@ -5,8 +5,6 @@ import requests
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
 import logging
-from pathlib import Path
-import json
 
 
 class ClimateDataLoader:

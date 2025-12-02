@@ -1,5 +1,5 @@
 """
-Alert Generation System - Day 12
+Alert Generation System
 Generates automated climate warnings and reports.
 """
 

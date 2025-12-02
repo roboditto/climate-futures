@@ -1,4 +1,4 @@
-# Getting Started with the Caribbean Climate Impact System
+# Getting Started with the Climate Futures System
 
 Welcome! This guide will help you get the system running in **under 10 minutes**.
 
@@ -399,7 +399,7 @@ python src/models/heatwave.py
 
 ## You're Ready
 
-The Caribbean Climate Impact System is now set up and ready to use.
+The Climate Futures System is now set up and ready to use.
 
 **Start with:**
 

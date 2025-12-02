@@ -1,5 +1,5 @@
 """
-Heatwave Prediction Model - Day 5
+Heatwave Prediction Model
 Binary classification model to predict heatwave events.
 """
 

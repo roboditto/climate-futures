@@ -1,5 +1,5 @@
 """
-Climate Risk Index Model - Day 9
+Climate Risk Index Model
 Combines all predictions into a unified 0-100 risk score.
 """
 

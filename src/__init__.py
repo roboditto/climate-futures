@@ -1,5 +1,5 @@
 """
-Caribbean Climate Impact Simulation & Early Warning System
+Climate Futures Simulation & Early Warning System
 
 A comprehensive Python-based climate risk model that predicts heatwaves,
 flooding, and storm surge risk for Caribbean islands using environmental

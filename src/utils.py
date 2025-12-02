@@ -1,5 +1,5 @@
 """
-Caribbean Climate Impact System - Utilities Module
+Climate Futures System - Utilities Module
 Provides common utility functions for the entire system.
 """
 

@@ -1,5 +1,5 @@
 """
-Quick Start Script for Caribbean Climate Impact System
+Quick Start Script for Climate Futures System
 Runs a complete demonstration of all features.
 """
 

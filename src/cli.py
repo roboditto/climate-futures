@@ -1,6 +1,6 @@
 """
-Command-Line Interface - Day 13
-Main entry point for the Caribbean Climate Impact System.
+Command-Line Interface
+Main entry point for the Climate Futures System.
 """
 
 import argparse
@@ -26,7 +26,7 @@ import numpy as np
 
 class ClimateSystem:
     """
-    Main Caribbean Climate Impact System.
+    Main Climate Futures System.
     """
     
     def __init__(self):
@@ -44,7 +44,7 @@ class ClimateSystem:
         self.visualizer = ClimateVisualizer(self.config, self.logger)
         self.alert_system = ClimateAlertSystem(self.config, self.logger)
         
-        self.logger.info("Caribbean Climate Impact System initialized")
+        self.logger.info("Climate Futures System initialized")
     
     def setup_data(self, days: int = 730, use_real_data: bool = False):
         """
@@ -291,7 +291,7 @@ class ClimateSystem:
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description='Caribbean Climate Impact Simulation & Early Warning System',
+        description='Climate Futures Simulation & Early Warning System',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -335,7 +335,7 @@ Examples:
         return
     
     # Initialize system
-    print("\n🌎 Caribbean Climate Impact System")
+    print("\n🌎 Climate Futures System")
     print("="*80)
     
     system = ClimateSystem()
@@ -365,7 +365,7 @@ Examples:
     if args.visualize or args.analyze:
         system.create_visualizations(df_pred)
     
-    print("\n✅ Caribbean Climate Impact System - Operations Complete\n")
+    print("\n✅ Climate Futures System - Operations Complete\n")
 
 
 if __name__ == "__main__":

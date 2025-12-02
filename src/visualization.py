@@ -174,7 +174,7 @@ class ClimateVisualizer:
             )
         
         fig.update_layout(
-            title="Caribbean Climate Risk Dashboard",
+            title="Climate Futures Risk Dashboard",
             height=800,
             showlegend=False,
             template='plotly_white'
