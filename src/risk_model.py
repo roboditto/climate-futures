@@ -287,7 +287,7 @@ class ClimateRiskIndex:
         Parameters:
         -----------
         df : pd.DataFrame
-            DataFrame with prediction columns
+           DataFrame with prediction columns
         flood_col : str
             Flood probability column name
         heatwave_col : str
@@ -298,7 +298,7 @@ class ClimateRiskIndex:
         Returns:
         --------
         pd.DataFrame
-            DataFrame with added risk scores and categories
+           DataFrame with added risk scores and categories
         """
         self.logger.info("Calculating batch risk scores...")
         

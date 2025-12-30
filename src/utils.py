@@ -209,7 +209,7 @@ def create_rolling_features(df: pd.DataFrame,
     Parameters:
     -----------
     df : pd.DataFrame
-        Input dataframe with datetime index
+        Input DataFrame with datetime index
     column : str
         Column name to create features from
     windows : list
@@ -218,7 +218,7 @@ def create_rolling_features(df: pd.DataFrame,
     Returns:
     --------
     pd.DataFrame
-        DataFrame with added rolling features
+       DataFrame with added rolling features
     """
     result = df.copy()
     
@@ -255,7 +255,7 @@ def create_lag_features(df: pd.DataFrame,
     Parameters:
     -----------
     df : pd.DataFrame
-        Input dataframe with datetime index
+        Input DataFrame with datetime index
     column : str
         Column name to create lag features from
     lags : list
@@ -264,7 +264,7 @@ def create_lag_features(df: pd.DataFrame,
     Returns:
     --------
     pd.DataFrame
-        DataFrame with added lag features
+       DataFrame with added lag features
     """
     result = df.copy()
     

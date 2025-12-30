@@ -125,6 +125,39 @@ def main():
     # Calculate risk scores (only for rows with all predictions)
     df = risk_calculator.calculate_batch_risk(df)
     print(f"✅ Predictions generated for {len(df)} days ({df['rainfall_pred'].notna().sum()} with rainfall forecast)")
+
+    # Short ERA5 regrid test: attempt to download & regrid a small hourly window for immediate demo use
+    try:
+        from era5_helper import download_era5_hourly, regrid_era5_to_grid, CDSAPI_AVAILABLE
+        import numpy as _np
+        if not _np.exists('data'):
+            os.makedirs('data', exist_ok=True)
+        regrid_path = 'data/era5_test_regrid.npy'
+        if not os.path.exists(regrid_path):
+            if CDSAPI_AVAILABLE:
+                print('\n🌐 Attempting short ERA5 download+regrid for demo (this may take a minute)...')
+                # use latest date in df as reference
+                latest_date = df.index[-1].date()
+                start = (latest_date - np.timedelta64(1, 'D')).astype('datetime64[D]').astype(str)
+                end = latest_date.astype('datetime64[D]').astype(str)
+                bounds = (17.7, -78.4, 18.5, -76.1)  # Jamaica example bbox
+                nc_out = 'data/era5_test.nc'
+                nc = download_era5_hourly(bounds, start, end, out_path=nc_out)
+                if nc:
+                    arr = regrid_era5_to_grid(nc, target_shape=(50, 50), target_bounds=bounds)
+                    if arr is not None:
+                        _np.save(regrid_path, arr)
+                        print(f'✅ ERA5 regrid saved to {regrid_path}')
+                    else:
+                        print('⚠️ ERA5 regrid returned None')
+                else:
+                    print('⚠️ ERA5 download failed or was skipped')
+            else:
+                print('ℹ️ CDS API not available; skipping ERA5 demo step')
+        else:
+            print(f'ℹ️ Found existing ERA5 regrid: {regrid_path}')
+    except Exception as e:
+        print('⚠️ ERA5 demo step failed:', e)
     
     # Step 5: Current Risk Assessment
     print("\n📊 STEP 5: Current Climate Risk Assessment...")

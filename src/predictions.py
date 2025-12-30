@@ -8,10 +8,43 @@ import pandas as pd
 import numpy as np
 import traceback
 import streamlit as st
+import datetime
 
 
-def generate_predictions(df: pd.DataFrame, system: Dict) -> pd.DataFrame:
+def generate_predictions(df: pd.DataFrame, system: Dict, forecast_days: int = 14) -> pd.DataFrame:
+    """Generate predictions and append a short forecast horizon.
+
+    Appends `forecast_days` future dates (starting from today) to `df` when
+    necessary and returns adataframe including predictions for that horizon.
+    """
     df_pred = df.copy()
+
+    # Ensure we have a forecast horizon reaching at least today + forecast_days-1
+    try:
+        last_date = pd.to_datetime(df_pred.index.max()).normalize()
+    except Exception:
+        last_date = None
+
+    today = pd.to_datetime(datetime.date.today())
+    target_end = today + pd.Timedelta(days=forecast_days - 1)
+
+    if last_date is None or last_date < target_end:
+        # If the existing data is stale (older than today), start the forecast
+        # horizon from today so we don't append a huge range between the
+        # last available record and the forecast target. If the data already
+        # covers today, continue from the day after the last date.
+        if last_date is None:
+            start = today
+        elif last_date < today:
+            start = today
+        else:
+            start = last_date + pd.Timedelta(days=1)
+
+        future_index = pd.date_range(start=start.normalize(), end=target_end.normalize(), freq='D')
+        if len(future_index) > 0:
+            # create empty rows with same columns
+            future_df = pd.DataFrame(index=future_index, columns=df_pred.columns)
+            df_pred = pd.concat([df_pred, future_df], axis=0)
 
     def _build_X_for_model(model_wrapper, df_src: pd.DataFrame) -> pd.DataFrame:
         model_obj = getattr(model_wrapper, 'model', None)
@@ -63,9 +96,21 @@ def generate_predictions(df: pd.DataFrame, system: Dict) -> pd.DataFrame:
         rainfall_model = system['models']['rainfall']
         X_rf = _build_X_for_model(rainfall_model, df_pred)
         rainfall_preds = rainfall_model.predict(X_rf)
-        df_pred['rainfall_pred'] = np.nan
-        df_pred.loc[df_pred.index[:len(rainfall_preds)], 'rainfall_pred'] = rainfall_preds
-        df_pred['rainfall_pred'] = df_pred['rainfall_pred'].bfill()
+        # Assign predictions across the full index when shapes align; otherwise
+        # attempt to align to the available portion and backfill.
+        try:
+            if len(rainfall_preds) == len(df_pred):
+                df_pred['rainfall_pred'] = rainfall_preds
+            else:
+                df_pred['rainfall_pred'] = np.nan
+                n = min(len(rainfall_preds), len(df_pred))
+                df_pred.iloc[:n, df_pred.columns.get_loc('rainfall_pred')] = rainfall_preds[:n]
+                df_pred['rainfall_pred'] = df_pred['rainfall_pred'].bfill()
+        except Exception:
+            # fallback to previous behaviour
+            df_pred['rainfall_pred'] = np.nan
+            df_pred.loc[df_pred.index[:len(rainfall_preds)], 'rainfall_pred'] = rainfall_preds
+            df_pred['rainfall_pred'] = df_pred['rainfall_pred'].bfill()
     except Exception as e:
         tb = traceback.format_exc()
         logger = system.get('logger') if isinstance(system, dict) else None
@@ -105,6 +150,19 @@ def generate_predictions(df: pd.DataFrame, system: Dict) -> pd.DataFrame:
         st.warning(f"⚠️ Could not calculate risk scores: {str(e)}. See logs for details.")
         if logger is None:
             st.text_area('Risk calculation traceback', tb, height=200)
+        rainfall_col = df_pred.get('rainfall_pred', pd.Series(0, index=df_pred.index))
+        if isinstance(rainfall_col, (int, float)):
+            rainfall_normalized = 0
+        else:
+            rainfall_normalized = (rainfall_col / 100.0).clip(0, 1) * 100
+        df_pred['overall_risk_score'] = (
+            df_pred.get('flood_prob', 0) * 100 * 0.4 +
+            df_pred.get('heatwave_prob', 0) * 100 * 0.4 +
+            rainfall_normalized * 0.2
+        )
+
+    # If risk_calculator did not produce an overall score, compute a fallback
+    if 'overall_risk_score' not in df_pred.columns:
         rainfall_col = df_pred.get('rainfall_pred', pd.Series(0, index=df_pred.index))
         if isinstance(rainfall_col, (int, float)):
             rainfall_normalized = 0

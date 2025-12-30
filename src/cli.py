@@ -252,11 +252,14 @@ class ClimateSystem:
             risk_score=risk_summary['overall_risk_score']
         )
         
-        # Generate report
+        # Generate report (respect output_dir if provided)
         from datetime import datetime
-        report_path = f"reports/daily_report_{datetime.now().strftime('%Y%m%d')}.txt"
+        outdir = self.config.get('output_dir', '.')
+        report_dir = os.path.join(outdir, 'reports') if outdir else 'reports'
+        os.makedirs(report_dir, exist_ok=True)
+        report_path = os.path.join(report_dir, f"daily_report_{datetime.now().strftime('%Y%m%d')}.txt")
         report = self.alert_system.generate_daily_report(risk_summary, alerts, save_path=report_path)
-        
+
         print(report)
         print(f"\n✅ Report saved to: {report_path}")
     
@@ -271,21 +274,23 @@ class ClimateSystem:
         """
         self.logger.info("Creating visualizations...")
         
-        # Create results directory
-        os.makedirs('results', exist_ok=True)
-        
+        # Determine results directory (allow override via config)
+        outdir = self.config.get('output_dir', '.')
+        results_dir = os.path.join(outdir, 'results') if outdir else 'results'
+        os.makedirs(results_dir, exist_ok=True)
+
         # Risk dashboard
-        self.visualizer.plot_risk_dashboard(df, save_path='results/risk_dashboard.html')
-        
+        self.visualizer.plot_risk_dashboard(df, save_path=os.path.join(results_dir, 'risk_dashboard.html'))
+
         # Forecasts
-        self.visualizer.plot_heatwave_forecast(df, days_ahead=14, save_path='results/heatwave_forecast.png')
-        self.visualizer.plot_rainfall_forecast(df, days_ahead=14, save_path='results/rainfall_forecast.png')
-        
+        self.visualizer.plot_heatwave_forecast(df, days_ahead=14, save_path=os.path.join(results_dir, 'heatwave_forecast.png'))
+        self.visualizer.plot_rainfall_forecast(df, days_ahead=14, save_path=os.path.join(results_dir, 'rainfall_forecast.png'))
+
         # Current risk gauge
         latest_risk = df['climate_risk_score'].iloc[-1]
-        self.visualizer.plot_risk_gauge(latest_risk, save_path='results/risk_gauge.html')
-        
-        print("\n✅ Visualizations created in 'results/' folder")
+        self.visualizer.plot_risk_gauge(latest_risk, save_path=os.path.join(results_dir, 'risk_gauge.html'))
+
+        print(f"\n✅ Visualizations created in '{results_dir}' folder")
 
 
 def main():
@@ -322,6 +327,10 @@ Examples:
                        help='Show current risk score')
     parser.add_argument('--visualize', action='store_true',
                        help='Create visualizations')
+    parser.add_argument('--output-dir', type=str, default=None,
+                       help='Directory to write outputs (reports, results).')
+    parser.add_argument('--coastline-shp', type=str, default=None,
+                       help='Path to coastline shapefile for masking/mapping.')
     parser.add_argument('--days', type=int, default=730,
                        help='Number of days of data (default: 730)')
     parser.add_argument('--real-data', action='store_true',
@@ -339,6 +348,14 @@ Examples:
     print("="*80)
     
     system = ClimateSystem()
+    # Apply CLI-specified output directory and coastline shapefile to system config
+    if args.output_dir:
+        system.config['output_dir'] = args.output_dir
+        os.makedirs(args.output_dir, exist_ok=True)
+        os.makedirs(os.path.join(args.output_dir, 'results'), exist_ok=True)
+        os.makedirs(os.path.join(args.output_dir, 'reports'), exist_ok=True)
+    if args.coastline_shp:
+        system.config['coastline_shapefile'] = args.coastline_shp
     
     # Setup data
     df = system.setup_data(days=args.days, use_real_data=args.real_data)

@@ -24,8 +24,8 @@ python src/flood_simulation.py
 
 Produces:
 
-- `results/flood_simulation.png` — static 3-panel visualization (DEM, water depth, flood zones)
-- `results/flood_map.html` — interactive Folium map with water depth overlay
+- `results/flood_simulation.png` - static 3-panel visualization (DEM, water depth, flood zones)
+- `results/flood_map.html` - interactive Folium map with water depth overlay
 
 ### With Real SRTM DEM
 
@@ -172,6 +172,50 @@ Tests cover:
 - [ ] Parallel computation for larger DEMs
 - [ ] Time-series rainfall input
 - [ ] Validation against observed flood extents
+
+## ERA5 (Hourly) — Optional: higher-resolution precipitation
+
+You can fetch ERA5-Land hourly total precipitation (useful for time-series simulations) via the
+Copernicus Climate Data Store (CDS) API. The project includes `src/era5_helper.py` which provides:
+
+- `download_era5_hourly(bounds, start_date, end_date, out_path)` — downloads a NetCDF of ERA5-Land
+  `total_precipitation` for the selected bbox and dates (requires `cdsapi` and a configured `~/.cdsapirc`).
+- `regrid_era5_to_grid(nc_path, target_shape, target_bounds)` — interpolates the NetCDF to your model
+  grid (rows, cols) and returns a numpy array of shape `(time, rows, cols)` in millimeters.
+
+Quick setup:
+
+1. Install dependencies:
+
+```bash
+pip install cdsapi xarray netCDF4
+```
+
+2. Configure CDS API credentials: create `~/.cdsapirc` with your CDS key following instructions at
+   https://cds.climate.copernicus.eu/api-how-to
+
+3. Example usage (Python):
+
+```python
+from era5_helper import download_era5_hourly, regrid_era5_to_grid
+
+bounds = (17.7, -78.4, 18.5, -76.1)  # south, west, north, east
+nc = download_era5_hourly(bounds, '2024-10-01', '2024-10-03', out_path='data/era5.nc')
+hourly = regrid_era5_to_grid(nc, target_shape=(200,200), target_bounds=bounds)
+# hourly.shape -> (time, rows, cols) in mm
+
+# pass to the simulator (time-series)
+from flood_simulation import FloodSimulator
+sim = FloodSimulator({}, None)
+dem = sim.generate_synthetic_dem(size=(200,200))
+water = sim.simulate_time_series_runoff(dem, hourly, duration_per_step_hours=1.0)
+```
+
+Notes:
+
+- If CDS credentials are not configured the helper warns and the code falls back to CHIRPS or synthetic rainfall.
+- ERA5 `total_precipitation` units are meters in the NetCDF; the helper converts to millimeters for the simulator.
+
 
 ## References
 

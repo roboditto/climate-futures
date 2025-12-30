@@ -152,7 +152,7 @@ class FloodPredictor:
         Parameters:
         -----------
         df : pd.DataFrame
-            Feature dataframe
+            Feature DataFrame
         target_col : str
             Target column name
         include_elevation : bool

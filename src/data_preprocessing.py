@@ -87,7 +87,7 @@ class ClimateDataLoader:
             # Extract parameter data
             parameters_data = data['properties']['parameter']
             
-            # Convert to DataFrame
+            # Convert todataframe
             df = pd.DataFrame(parameters_data)
             df.index = pd.to_datetime(df.index, format='%Y%m%d')
             df.index.name = 'date'
@@ -177,7 +177,7 @@ class ClimateDataLoader:
         # Pressure: around 1013 hPa
         pressure = 1013 + 5 * np.sin(2 * np.pi * day_of_year / 365) + np.random.normal(0, 3, len(dates))
         
-        # Create DataFrame
+        # Createdataframe
         df = pd.DataFrame({
             'temperature': temperature,
             'temperature_max': temperature_max,

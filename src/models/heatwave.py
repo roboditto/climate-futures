@@ -81,7 +81,7 @@ class HeatwavePredictor:
         Parameters:
         -----------
         df : pd.DataFrame
-            Feature dataframe
+            Feature DataFrame
         target_col : str
             Target column name
         exclude_cols : list, optional

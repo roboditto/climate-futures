@@ -48,7 +48,7 @@ class RainfallPredictor:
         Parameters:
         -----------
         df : pd.DataFrame
-            Feature dataframe
+            Feature DataFrame
         target_col : str
             Target column name (precipitation)
         forecast_days : int

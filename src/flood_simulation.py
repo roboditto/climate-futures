@@ -14,6 +14,22 @@ import gzip
 import requests
 from typing import List
 
+# Optional Numba for performance
+try:
+    import numba
+    NUMBA_AVAILABLE = True
+except Exception:
+    numba = None
+    NUMBA_AVAILABLE = False
+
+# Optional geopandas for coastline shapefile handling
+try:
+    import geopandas as gpd
+    GEOPANDAS_AVAILABLE = True
+except Exception:
+    gpd = None
+    GEOPANDAS_AVAILABLE = False
+
 # Optional rasterio for real DEM handling
 try:
     import rasterio
@@ -33,6 +49,100 @@ try:
     FOLIUM_AVAILABLE = True
 except Exception:
     FOLIUM_AVAILABLE = False
+
+# Optional ERA5 helper
+try:
+    from era5_helper import download_era5_hourly, regrid_era5_to_grid, CDSAPI_AVAILABLE, XR_AVAILABLE
+    ERA5_AVAILABLE = True
+except Exception:
+    download_era5_hourly = None
+    regrid_era5_to_grid = None
+    CDSAPI_AVAILABLE = False
+    XR_AVAILABLE = False
+    ERA5_AVAILABLE = False
+
+
+def get_country_defaults(country_name: str, bbox_override: Optional[str] = None):
+    """Return simulation defaults (bounds, grid size, elevation range) for a country.
+
+    If bbox_override provided (string 'south,west,north,east'), it will be used.
+    """
+    # If bbox_override provided, parse it as 'south,west,north,east'
+    if bbox_override:
+        try:
+            parts = [float(x) for x in bbox_override.split(',')]
+            if len(parts) == 4:
+                bounds = (parts[0], parts[1], parts[2], parts[3])
+            else:
+                raise ValueError('bbox must have 4 comma-separated floats')
+        except Exception:
+            bounds = (17.7, -78.4, 18.5, -76.1)
+    else:
+        # Try geopandas naturalearth lookup if available
+        if GEOPANDAS_AVAILABLE:
+            try:
+                world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+                row = world[world['name'].str.lower() == country_name.lower()]
+                if len(row) > 0:
+                    bounds_box = row.total_bounds[0], row.total_bounds[1], row.total_bounds[2], row.total_bounds[3]
+                    bounds = (bounds_box[1], bounds_box[0], bounds_box[3], bounds_box[2])
+                else:
+                    bounds = None
+            except Exception:
+                bounds = None
+        else:
+            bounds = None
+
+        # Builtin fallbacks for small set
+        if bounds is None:
+            builtin = {
+                'jamaica': (17.7, -78.4, 18.5, -76.1),
+                'haiti': (18.0, -74.5, 20.1, -71.6),
+                'cuba': (19.6, -85.0, 23.5, -74.1),
+                'dominican republic': (17.5, -72.1, 20.1, -68.2),
+                'trinidad and tobago': (10.0, -61.9, 11.2, -60.8),
+                'barbados': (13.0, -59.7, 13.3, -59.4),
+                'bahamas': (20.6, -80.7, 27.1, -71.0),
+                'guyana': (1.17, -61.4, 8.5, -56.5)
+            }
+            bounds = builtin.get(country_name.lower(), (17.7, -78.4, 18.5, -76.1))
+
+    defaults = {
+        'bounds': bounds,
+        'dem_size': (200, 200),
+        'elevation_range': (0, 1200),
+        'rainfall_mm': 150.0,
+        'duration_hours': 6.0
+    }
+    return defaults
+
+# If numba is available, predefine a jitted D8 function for speed
+if NUMBA_AVAILABLE:
+    from numba import njit
+
+    @njit
+    def _d8_numba(dem, resolution):
+        rows, cols = dem.shape
+        flow_dir = np.full((rows, cols), -1, np.int8)
+        # directions: N, NE, E, SE, S, SW, W, NW
+        dirs = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+
+        for i in range(1, rows-1):
+            for j in range(1, cols-1):
+                current = dem[i, j]
+                max_slope = 0.0
+                max_dir = -1
+                for d in range(8):
+                    di, dj = dirs[d]
+                    ni, nj = i + di, j + dj
+                    neighbor = dem[ni, nj]
+                    distance = ((di*di + dj*dj) ** 0.5) * resolution
+                    slope = (current - neighbor) / distance
+                    if slope > max_slope:
+                        max_slope = slope
+                        max_dir = d
+                flow_dir[i, j] = max_dir
+        return flow_dir
 
 
 class FloodSimulator:
@@ -58,6 +168,8 @@ class FloodSimulator:
         self.manning_n = self.sim_config.get('manning_coefficient', 0.035)
         self.timestep = self.sim_config.get('timestep', 300)
         self.max_iterations = self.sim_config.get('max_iterations', 1000)
+        # Optional performance toggle
+        self.use_numba = self.sim_config.get('use_numba', False)
     
     def generate_synthetic_dem(self, size: Tuple[int, int] = (100, 100),
                               elevation_range: Tuple[float, float] = (0, 100)) -> np.ndarray:
@@ -321,36 +433,43 @@ class FloodSimulator:
             Flow direction grid (0-7 for 8 directions, -1 for sinks)
         """
         self.logger.info("Calculating D8 flow directions...")
-        
+
+        # If numba is available and requested, use jitted implementation
+        if NUMBA_AVAILABLE and self.use_numba:
+            try:
+                return _d8_numba(dem.astype(np.float64), float(self.resolution))
+            except Exception:
+                self.logger.debug('Numba D8 failed; falling back to Python implementation')
+
         rows, cols = dem.shape
         flow_dir = np.full((rows, cols), -1, dtype=np.int8)
-        
+
         # 8 directions: [N, NE, E, SE, S, SW, W, NW]
         directions = [
             (-1, 0), (-1, 1), (0, 1), (1, 1),
             (1, 0), (1, -1), (0, -1), (-1, -1)
         ]
-        
+
         for i in range(1, rows-1):
             for j in range(1, cols-1):
                 current_elev = dem[i, j]
                 max_slope = 0
                 max_dir = -1
-                
+
                 for d, (di, dj) in enumerate(directions):
                     ni, nj = i + di, j + dj
                     neighbor_elev = dem[ni, nj]
-                    
+
                     # Calculate slope
                     distance = np.sqrt(di**2 + dj**2) * self.resolution
                     slope = (current_elev - neighbor_elev) / distance
-                    
+
                     if slope > max_slope:
                         max_slope = slope
                         max_dir = d
-                
+
                 flow_dir[i, j] = max_dir
-        
+
         return flow_dir
     
     def calculate_flow_accumulation(self, flow_dir: np.ndarray) -> np.ndarray:
@@ -393,6 +512,90 @@ class FloodSimulator:
                             accumulation[ni, nj] += accumulation[i, j]
         
         return accumulation
+
+    def generate_hourly_from_daily(self, daily_field: np.ndarray, hours: int = 24, profile: Optional[np.ndarray] = None) -> np.ndarray:
+        """
+        Break a daily rainfall field into an hourly time series using a simple diurnal profile.
+
+        Returns an array shape (hours, rows, cols) where each slice sums to the original daily_field.
+        """
+        rows, cols = daily_field.shape
+        if profile is None:
+            # Simple diurnal profile: peak mid-afternoon, less overnight
+            hrs = np.arange(hours)
+            profile = 0.5 + 0.5 * np.sin((hrs - 6) / float(hours) * 2 * np.pi)
+            profile = np.maximum(profile, 0.01)
+
+        profile = np.array(profile, dtype=float)
+        profile = profile / profile.sum()
+
+        hourly = np.zeros((hours, rows, cols), dtype=float)
+        for h in range(hours):
+            hourly[h] = daily_field * profile[h]
+
+        return hourly
+
+    def simulate_time_series_runoff(self, dem: np.ndarray, hourly_rain: np.ndarray, duration_per_step_hours: float = 1.0) -> np.ndarray:
+        """
+        Run simulation sequentially over hourly rainfall slices and accumulate water depth.
+
+        `hourly_rain` shape expected: (hours, rows, cols)
+        """
+        accumulated = np.zeros_like(dem, dtype=float)
+        hours = hourly_rain.shape[0]
+        for h in range(hours):
+            self.logger.info(f"Simulating hour {h+1}/{hours}")
+            slice_field = hourly_rain[h]
+            # Run a short simulation step using the hourly slice
+            step_depth = self.simulate_rainfall_runoff(dem, duration_hours=duration_per_step_hours, rainfall_field=slice_field)
+            # Accumulate (simple superposition)
+            accumulated += step_depth
+
+        # Simple smoothing to represent routing over time
+        accumulated = ndimage.gaussian_filter(accumulated, sigma=1)
+        return accumulated
+
+    def apply_coastline_mask(self, water_depth: np.ndarray, coastline_shp: str, bounds: Optional[Tuple[float, float, float, float]] = None) -> np.ndarray:
+        """
+        Mask out areas inland or ocean using a coastline shapefile. The shapefile should contain polygon(s)
+        representing land. This will zero-out water depth outside land area (i.e., in ocean).
+        """
+        if not RASTERIO_AVAILABLE:
+            self.logger.warning('rasterio not available; cannot apply coastline mask')
+            return water_depth
+
+        try:
+            if GEOPANDAS_AVAILABLE:
+                gdf = gpd.read_file(coastline_shp)
+                geoms = [geom for geom in gdf.geometry]
+            else:
+                # Fallback: try fiona if geopandas not present
+                import fiona
+                with fiona.open(coastline_shp) as src:
+                    geoms = [feat['geometry'] for feat in src]
+
+            rows, cols = water_depth.shape
+            if bounds is None:
+                # If bounds unknown, assume generic grid covering small area; return original
+                self.logger.warning('Bounds required for rasterizing coastline; skipping mask')
+                return water_depth
+
+            south, west, north, east = bounds
+            # Build transform
+            from rasterio.transform import from_bounds
+            transform = from_bounds(west, south, east, north, cols=cols, rows=rows)
+
+            # rasterize geometries: inside land -> 1, outside -> 0
+            from rasterio.features import rasterize
+            mask = rasterize(geoms, out_shape=(rows, cols), transform=transform, fill=0, all_touched=True, default_value=1)
+
+            # Keep water only where mask==1 (land)
+            out = water_depth.copy()
+            out[mask == 0] = 0.0
+            return out
+        except Exception as e:
+            self.logger.warning(f'Failed to apply coastline mask: {e}')
+            return water_depth
     
     def simulate_rainfall_runoff(self, dem: np.ndarray,
                                  rainfall_mm: float = 0.0,
@@ -667,7 +870,7 @@ class FloodSimulator:
 
 
 def main(interactive: bool = False, use_srtm: bool = False, use_chirps: bool = False,
-         chirps_start: str = '', chirps_end: str = ''):
+         chirps_start: str = '', chirps_end: str = '', output_dir: str = 'results', coastline_shp: str = '', use_numba: bool = False, time_series: bool = False, country: str = 'Jamaica', bbox: Optional[str] = None, use_era5: bool = False, era5_start: str = '', era5_end: str = ''):
     """Example usage with optional observational data sources."""
     from utils import load_config, setup_logging
     
@@ -675,24 +878,18 @@ def main(interactive: bool = False, use_srtm: bool = False, use_chirps: bool = F
     logger = setup_logging(config)
     
     # Initialize simulator
+    # Allow overriding numba usage via CLI flag
+    if 'flood_simulation' not in config:
+        config['flood_simulation'] = {}
+    config['flood_simulation']['use_numba'] = use_numba
     simulator = FloodSimulator(config, logger)
-    
-    # Helper: Jamaica climate defaults (simple distributional defaults)
-    def get_jamaica_defaults():
-        # Typical Jamaica bounding box and rainfall tendencies
-        defaults = {
-            'bounds': (17.7, -78.4, 18.5, -76.1),  # south, west, north, east
-            'dem_size': (200, 200),
-            'elevation_range': (0, 1200),  # Jamaica has peaks ~700-2000m; keep generous range
-            # Intense event example: 50-200 mm in a single event; pick a heavy event
-            'rainfall_mm': 150.0,
-            'duration_hours': 6.0
-        }
-        return defaults
 
-    # Generate DEM over Jamaica-like area; prefer a real DEM if available
-    print("Preparing DEM (real DEM if available, else synthetic)...")
-    defaults = get_jamaica_defaults()
+    
+    # Use module-level get_country_defaults (defined below)
+
+    # Generate DEM over requested country; prefer a real DEM if available
+    print(f"Preparing DEM for {country} (real DEM if available, else synthetic)...")
+    defaults = get_country_defaults(country, bbox_override=bbox)
     dem = None
     bounds = defaults['bounds']
     dem_path = os.path.join('data', 'dem_jamaica.tif')
@@ -716,6 +913,21 @@ def main(interactive: bool = False, use_srtm: bool = False, use_chirps: bool = F
 
     # Try to fetch CHIRPS if requested
     rainfall_field = None
+    era5_hourly = None
+    used_era5 = False
+    # Try ERA5 if requested
+    if use_era5 and era5_start and era5_end:
+        if ERA5_AVAILABLE and CDSAPI_AVAILABLE:
+            print(f"Attempting to download ERA5 for {era5_start} to {era5_end}...")
+            nc = download_era5_hourly(bounds, era5_start, era5_end, out_path=os.path.join('data', 'era5_precip.nc'))
+            if nc is not None:
+                hourly = regrid_era5_to_grid(nc, target_shape=defaults['dem_size'], target_bounds=defaults['bounds'])
+                if hourly is not None:
+                    era5_hourly = hourly
+                    used_era5 = True
+                    print(f"Successfully obtained ERA5 hourly data ({hourly.shape[0]} timesteps)")
+        else:
+            print('ERA5 helper or CDS API not available; skipping ERA5 download')
     if use_chirps and chirps_start and chirps_end:
         print(f"Attempting to download CHIRPS for {chirps_start} to {chirps_end}...")
         rainfall_field = simulator.download_chirps_sum(chirps_start, chirps_end, bounds, target_shape=defaults['dem_size'])
@@ -729,12 +941,35 @@ def main(interactive: bool = False, use_srtm: bool = False, use_chirps: bool = F
 
     # Simulate rainfall-runoff using the spatial rainfall field
     print("Simulating flood with spatial rainfall field...")
-    water_depth = simulator.simulate_rainfall_runoff(dem, duration_hours=defaults['duration_hours'], rainfall_field=rainfall_field)
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Priority: ERA5 hourly (if requested and available) -> CHIRPS daily -> synthetic
+    if used_era5 and era5_hourly is not None:
+        if time_series:
+            water_depth = simulator.simulate_time_series_runoff(dem, era5_hourly, duration_per_step_hours=1.0)
+        else:
+            # If user didn't request time_series, sum ERA5 to daily field and run single-step
+            daily_sum = era5_hourly.sum(axis=0)
+            water_depth = simulator.simulate_rainfall_runoff(dem, duration_hours=defaults['duration_hours'], rainfall_field=daily_sum)
+    else:
+        if time_series:
+            # break daily into hourly and run time-series simulation
+            hourly = simulator.generate_hourly_from_daily(rainfall_field, hours=24)
+            water_depth = simulator.simulate_time_series_runoff(dem, hourly, duration_per_step_hours=1.0)
+        else:
+            water_depth = simulator.simulate_rainfall_runoff(dem, duration_hours=defaults['duration_hours'], rainfall_field=rainfall_field)
 
     # Visualize: static plot + interactive map (if folium installed)
     print("Creating static visualization (results/flood_simulation.png) and interactive map (results/flood_map.html)...")
-    simulator.plot_simulation(dem, water_depth, save_path='results/flood_simulation.png')
-    simulator.export_map(dem, water_depth, save_html='results/flood_map.html', bounds=defaults['bounds'])
+    # Apply coastline mask if provided
+    if coastline_shp:
+        print(f"Applying coastline mask from {coastline_shp}...")
+        water_depth = simulator.apply_coastline_mask(water_depth, coastline_shp, bounds=defaults['bounds'])
+
+    fig_path = os.path.join(output_dir, 'flood_simulation.png')
+    map_path = os.path.join(output_dir, 'flood_map.html')
+    simulator.plot_simulation(dem, water_depth, save_path=fig_path)
+    simulator.export_map(dem, water_depth, save_html=map_path, bounds=defaults['bounds'])
 
     print("\nSimulation complete!")
     print(f"Maximum water depth: {water_depth.max():.3f} m")
@@ -749,12 +984,23 @@ if __name__ == "__main__":
     parser.add_argument('--use-chirps', action='store_true', help='Attempt to download CHIRPS daily rainfall data.')
     parser.add_argument('--chirps-start', type=str, default='', help='CHIRPS download start date (YYYY-MM-DD). Required if --use-chirps.')
     parser.add_argument('--chirps-end', type=str, default='', help='CHIRPS download end date (YYYY-MM-DD). Required if --use-chirps.')
+    parser.add_argument('--output-dir', type=str, default='results', help='Directory to write outputs (plots, maps).')
+    parser.add_argument('--coastline-shp', type=str, default='', help='Shapefile path for coastline/land masking (optional).')
+    parser.add_argument('--use-numba', action='store_true', help='Use Numba JIT for flow direction calculation if available.')
+    parser.add_argument('--time-series', action='store_true', help='Run time-series simulation using hourly breakup of daily CHIRPS (if available).')
+    parser.add_argument('--country', type=str, default='Jamaica', help='Country name to run simulation for (uses NaturalEarth bounds if geopandas available).')
+    parser.add_argument('--bbox', type=str, default='', help='Optional bbox override as "south,west,north,east"')
+    parser.add_argument('--use-era5', action='store_true', help='Attempt to download ERA5-Land hourly precipitation via CDS API')
+    parser.add_argument('--era5-start', type=str, default='', help='ERA5 start date (YYYY-MM-DD)')
+    parser.add_argument('--era5-end', type=str, default='', help='ERA5 end date (YYYY-MM-DD)')
     
     args = parser.parse_args()
     
     # Switch to interactive backend if requested
     if args.interactive:
         matplotlib.use('TkAgg')
-    
+
     main(interactive=args.interactive, use_srtm=args.use_srtm, use_chirps=args.use_chirps,
-         chirps_start=args.chirps_start, chirps_end=args.chirps_end)
+         chirps_start=args.chirps_start, chirps_end=args.chirps_end,
+         output_dir=args.output_dir, coastline_shp=args.coastline_shp, use_numba=args.use_numba, time_series=args.time_series,
+         country=args.country, bbox=args.bbox, use_era5=args.use_era5, era5_start=args.era5_start, era5_end=args.era5_end)
