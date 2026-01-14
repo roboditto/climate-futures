@@ -158,11 +158,11 @@ alerts:
     
     flood:
       threshold: 0.6
-      message: "🌊 FLOOD ALERT: Significant flood risk detected. Monitor rainfall closely."
+      message: " FLOOD ALERT: Significant flood risk detected. Monitor rainfall closely."
     
     rainfall:
       threshold: 100  # mm
-      message: "🌧️ HEAVY RAINFALL ALERT: Extreme precipitation expected."
+      message: " HEAVY RAINFALL ALERT: Extreme precipitation expected."
     
     combined_risk:
       threshold: 70

@@ -133,15 +133,15 @@ class ClimateSystem:
         print("\n" + "="*80)
         print("MODEL TRAINING RESULTS")
         print("="*80)
-        print(f"\n🌡️  Heatwave Model:")
+        print(f"\n  Heatwave Model:")
         print(f"   Accuracy: {hw_metrics['accuracy']:.3f}")
         print(f"   ROC-AUC: {hw_metrics['roc_auc']:.3f}")
         
-        print(f"\n🌧️  Rainfall Model:")
+        print(f"\n  Rainfall Model:")
         print(f"   RMSE: {rf_metrics['rmse']:.2f} mm")
         print(f"   R²: {rf_metrics['r2']:.3f}")
         
-        print(f"\n🌊 Flood Model:")
+        print(f"\nFlood Model:")
         print(f"   Accuracy: {fl_metrics['accuracy']:.3f}")
         print(f"   ROC-AUC: {fl_metrics['roc_auc']:.3f}")
         print("="*80 + "\n")

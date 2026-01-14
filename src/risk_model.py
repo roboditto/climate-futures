@@ -249,18 +249,18 @@ class ClimateRiskIndex:
             recommendations.append("⚠️ HIGH FLOOD RISK: Avoid low-lying areas and stay informed about local warnings")
             recommendations.append("🚗 Do not attempt to drive through flooded areas")
         elif flood_prob > 0.5:
-            recommendations.append("🌊 Moderate flood risk: Monitor weather updates closely")
+            recommendations.append(" Moderate flood risk: Monitor weather updates closely")
         
         # Heatwave recommendations
         if heatwave_prob > 0.7:
-            recommendations.append("🌡️ EXTREME HEAT WARNING: Stay hydrated and limit outdoor activities")
+            recommendations.append(" EXTREME HEAT WARNING: Stay hydrated and limit outdoor activities")
             recommendations.append("❄️ Seek air-conditioned environments during peak heat hours")
         elif heatwave_prob > 0.5:
             recommendations.append("☀️ High temperatures expected: Take precautions against heat stress")
         
         # Rainfall recommendations
         if rainfall_mm > 100:
-            recommendations.append("🌧️ HEAVY RAINFALL: Expect travel disruptions and potential flash flooding")
+            recommendations.append(" HEAVY RAINFALL: Expect travel disruptions and potential flash flooding")
         elif rainfall_mm > 50:
             recommendations.append("☔ Significant rainfall expected: Carry rain gear and allow extra travel time")
         
